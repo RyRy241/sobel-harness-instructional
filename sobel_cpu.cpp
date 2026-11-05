@@ -46,8 +46,21 @@ sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, f
 {
    float t=0.0;
 
-   // ADD CODE HERE: add your code here for computing the sobel stencil computation at location (i,j)
-   // of input s, returning a float
+   // 3x3 stencil centered at (i,j): i = row, j = col, row-major layout s[row*ncols + col].
+   // Border pixels (where the window would fall off the image) are left at 0.
+   if (i < 1 || j < 1 || i >= nrows-1 || j >= ncols-1)
+      return t;
+
+   double Gx=0.0, Gy=0.0;   // double accumulation matches correct_results_4x.dat bit-for-bit
+   for (int di=-1; di<=1; di++)
+      for (int dj=-1; dj<=1; dj++)
+      {
+         float v = s[(i+di)*ncols + (j+dj)];
+         int w = (di+1)*3 + (dj+1);
+         Gx += gx[w]*v;
+         Gy += gy[w]*v;
+      }
+   t = sqrt(Gx*Gx + Gy*Gy);
 
    return t;
 }
@@ -71,8 +84,12 @@ do_sobel_filtering(float *in, float *out, int ncols, int nrows)
    float Gx[] = {1.0, 0.0, -1.0, 2.0, 0.0, -2.0, 1.0, 0.0, -1.0};
    float Gy[] = {1.0, 2.0, 1.0, 0.0, 0.0, 0.0, -1.0, -2.0, -1.0};
 
-   // ADD CODE HERE: insert your code here that iterates over every (i,j) of input,  makes a call
-   // to sobel_filtered_pixel, and assigns the resulting value at location (i,j) in the output.
+   // parallel for spans both the row and column loops (collapse(2));
+   // thread count and schedule come from OMP_NUM_THREADS / OMP_SCHEDULE
+   #pragma omp parallel for collapse(2) schedule(runtime)
+   for (int i=0; i<nrows; i++)
+      for (int j=0; j<ncols; j++)
+         out[i*ncols + j] = sobel_filtered_pixel(in, i, j, ncols, nrows, Gx, Gy);
 
 }
 

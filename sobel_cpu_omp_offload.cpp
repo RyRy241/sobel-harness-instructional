@@ -43,17 +43,32 @@ char output_fname[] = "../data/processed-raw-int8-4x-cpu.dat";
 
 // see https://en.wikipedia.org/wiki/Sobel_operator
 //
+#pragma omp declare target
 float
 sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, float *gy)
 {
 
    float t=0.0;
 
-   // ADD CODE HERE: add your code here for computing the sobel stencil computation at location (i,j)
-   // of input s, returning a float
+   // 3x3 stencil centered at (i,j): i = row, j = col, row-major layout s[row*ncols + col].
+   // Border pixels (where the window would fall off the image) are left at 0.
+   if (i < 1 || j < 1 || i >= nrows-1 || j >= ncols-1)
+      return t;
+
+   double Gx=0.0, Gy=0.0;   // double accumulation matches correct_results_4x.dat bit-for-bit
+   for (int di=-1; di<=1; di++)
+      for (int dj=-1; dj<=1; dj++)
+      {
+         float v = s[(i+di)*ncols + (j+dj)];
+         int w = (di+1)*3 + (dj+1);
+         Gx += gx[w]*v;
+         Gy += gy[w]*v;
+      }
+   t = sqrt(Gx*Gx + Gy*Gy);
 
    return t;
 }
+#pragma omp end declare target
 
 //
 //  do_sobel_filtering() will iterate over all input image pixels and invoke the
@@ -85,15 +100,14 @@ do_sobel_filtering(float *in, float *out, int ncols, int nrows)
 
 // ADD CODE HERE: you will need to add one more item to this line to map the "out" data array such that 
 // it is returned from the the device after the computation is complete. everything else here is input.
-#pragma omp target data map(to:in[0:nvals]) map(to:width) map(to:height) map(to:Gx[0:9]) map(to:Gy[0:9]) 
+#pragma omp target data map(to:in[0:nvals]) map(to:width) map(to:height) map(to:Gx[0:9]) map(to:Gy[0:9]) map(from:out[0:nvals])
    {
 
-   // ADD CODE HERE: insert your code here that iterates over every (i,j) of input,  makes a call
-   // to sobel_filtered_pixel, and assigns the resulting value at location (i,j) in the output.
-   
-   // don't forget to include a  #pragma omp target teams parallel for around those loop(s).
-   // You may also wish to consider additional clauses that might be appropriate here to increase parallelism 
-   // if you are using nested loops.
+   // distribute the collapsed (row, col) iteration space across GPU teams and threads
+   #pragma omp target teams distribute parallel for collapse(2)
+   for (int i=0; i<height; i++)
+      for (int j=0; j<width; j++)
+         out[i*width + j] = sobel_filtered_pixel(in, i, j, width, height, Gx, Gy);
 
    } // pragma omp target data
 }

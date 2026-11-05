@@ -115,3 +115,29 @@ Usage:
 
 
 # eof
+
+# How to run MY implementation (CP5)
+
+Build as described above (PrgEnv-nvidia, CC/CXX set, cmake + make in `build/`), staged under `$SCRATCH`.
+Run all programs from inside `build/` (they read/write `../data/...`).
+
+**CPU / OpenMP (`sobel_cpu`)** – concurrency and schedule are set only via environment variables:
+
+    export OMP_SCHEDULE=static
+    for t in 1 2 4 8 16; do OMP_NUM_THREADS=$t ./sobel_cpu; done
+
+**CUDA (`sobel_gpu`)** – threads per block and number of blocks are command-line arguments:
+
+    ./sobel_gpu -N <threadsPerBlock> -B <nBlocks>      # defaults: -N 256 -B 1
+    ncu --set basic --metrics gpu__time_duration.avg,dram__throughput.avg.pct_of_peak_sustained_elapsed ./sobel_gpu -N 256 -B 4096
+    sbatch ../scripts/run-cp5-cuda-configs-gpu-perlmutter.sh   # full 6x7 sweep
+
+The kernel uses a grid-stride loop, so any -N/-B combination processes the whole image.
+
+**OpenMP offload (`sobel_cpu_omp_offload`)** – no arguments:
+
+    ncu --set basic --metrics gpu__time_duration.avg,dram__throughput.avg.pct_of_peak_sustained_elapsed ./sobel_cpu_omp_offload
+
+**Verification:** outputs were checked byte-for-byte against `data/correct_results_4x.dat`, e.g.
+
+    python -c "import numpy as n;print((n.fromfile('../data/processed-raw-int8-4x-gpu.dat',n.uint8)!=n.fromfile('../data/correct_results_4x.dat',n.uint8)).sum())"   # prints 0
