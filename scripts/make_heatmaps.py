@@ -30,7 +30,8 @@ for k in range(1, len(chunks), 3):
     if m:
         v = float(m.group(2).replace(",", ""))
         unit = m.group(1)
-        runtime[i, j] = v / 1000.0 if unit == "usecond" or unit == "us" else (v if unit in ("msecond", "ms") else v / 1e6)
+        to_ms = {"nsecond":1e-6,"ns":1e-6,"usecond":1e-3,"us":1e-3,"msecond":1.0,"ms":1.0,"second":1e3,"s":1e3}
+        runtime[i, j] = v * to_ms[unit]
     m = re.search(r"Achieved Occupancy\s+%\s+([\d.,]+)", body)
     if m: occ[i, j] = float(m.group(1).replace(",", ""))
     m = re.search(r"dram__throughput\.avg\.pct_of_peak_sustained_elapsed\s+%\s+([\d.,]+)", body)
