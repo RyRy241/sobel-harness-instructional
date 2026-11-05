@@ -1,0 +1,99 @@
+==PROF== Connected to process 2105380 (/pscratch/sd/r/ravnjarl/sobel-harness-instructional/build/sobel_cpu_omp_offload)
+==PROF== Profiling "nvkernel__Z18do_sobel_filteri..." - 0: 0%....50%....100% - 11 passes
+ Read data from the file ../data/zebra-gray-int8-4x 
+ Elapsed time is : 2.75921 
+ Wrote the output file ../data/processed-raw-int8-4x-cpu.dat 
+==PROF== Disconnected from process 2105380
+[2105380] sobel_cpu_omp_offload@127.0.0.1
+  nvkernel__Z18do_sobel_filteringPfS_ii_F1L108_2 (285925, 1, 1)x(128, 1, 1), Context 1, Stream 16, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    -------------------------------------------------- ----------- ------------
+    Metric Name                                        Metric Unit Metric Value
+    -------------------------------------------------- ----------- ------------
+    dram__throughput.avg.pct_of_peak_sustained_elapsed           %        22.82
+    gpu__time_duration.avg                                      us       798.40
+    -------------------------------------------------- ----------- ------------
+
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         1.21
+    SM Frequency                    Ghz         1.09
+    Elapsed Cycles                cycle      873,984
+    Memory Throughput                 %        37.70
+    DRAM Throughput                   %        22.82
+    Duration                         us       798.40
+    L1/TEX Cache Throughput           %        37.82
+    L2 Cache Throughput               %        29.04
+    SM Active Cycles              cycle   870,503.79
+    Compute (SM) Throughput           %        65.73
+    ----------------------- ----------- ------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   128
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                285,925
+    Registers Per Thread             register/thread              48
+    Shared Memory Configuration Size           Kbyte           32.77
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block        byte/block               0
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread      36,598,400
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                              264.75
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block           10
+    Block Limit Shared Mem                block           32
+    Block Limit Warps                     block           16
+    Theoretical Active Warps per SM        warp           40
+    Theoretical Occupancy                     %        62.50
+    Achieved Occupancy                        %        51.10
+    Achieved Active Warps Per SM           warp        32.70
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 18.24%                                                                                    
+          The difference between calculated theoretical (62.5%) and measured achieved occupancy (51.1%) can be the      
+          result of warp scheduling overheads or workload imbalances during the kernel execution. Load imbalances can   
+          occur between warps within a block as well as across blocks of the same kernel. See the CUDA Best Practices   
+          Guide (https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy) for more details on     
+          optimizing occupancy.                                                                                         
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 37.5%                                                                                     
+          The 10.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the      
+          hardware maximum of 16. This kernel's theoretical occupancy (62.5%) is limited by the number of required      
+          registers.                                                                                                    
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- ------------
+    Metric Name                Metric Unit Metric Value
+    -------------------------- ----------- ------------
+    Average DRAM Active Cycles       cycle   221,353.90
+    Total DRAM Elapsed Cycles        cycle   38,800,128
+    Average L1 Active Cycles         cycle   870,503.79
+    Total L1 Elapsed Cycles          cycle   94,311,442
+    Average L2 Active Cycles         cycle   832,230.78
+    Total L2 Elapsed Cycles          cycle   67,027,840
+    Average SM Active Cycles         cycle   870,503.79
+    Total SM Elapsed Cycles          cycle   94,311,442
+    Average SMSP Active Cycles       cycle   869,594.25
+    Total SMSP Elapsed Cycles        cycle  377,245,768
+    -------------------------- ----------- ------------
+
