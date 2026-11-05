@@ -138,6 +138,7 @@ The kernel uses a grid-stride loop, so any -N/-B combination processes the whole
 
     ncu --set basic --metrics gpu__time_duration.avg,dram__throughput.avg.pct_of_peak_sustained_elapsed ./sobel_cpu_omp_offload
 
-**Verification:** outputs were checked byte-for-byte against `data/correct_results_4x.dat`, e.g.
+**Verification:** all three programs write `../data/processed-raw-int8-4x-cpu.dat` (filename hard-coded in the harness).
+Outputs were checked byte-for-byte against the reference:
 
-    python -c "import numpy as n;print((n.fromfile('../data/processed-raw-int8-4x-gpu.dat',n.uint8)!=n.fromfile('../data/correct_results_4x.dat',n.uint8)).sum())"   # prints 0
+    cmp ../data/processed-raw-int8-4x-cpu.dat ../data/correct_results_4x.dat && echo MATCH
